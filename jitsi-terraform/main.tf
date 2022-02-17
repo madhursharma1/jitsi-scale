@@ -44,6 +44,20 @@ output "alb" {
   value = module.alb
 }
 
+module "asg" {
+  source = "./asg"
+
+  asg_name               = var.asg_name
+  subnets_id             = data.aws_subnet_ids.public-subnets.ids
+  desired_capacity       = var.desired_capacity
+  min_size               = var.min_size
+  max_size               = var.max_size
+}
+
+output "asg" {
+  value = module.asg
+}
+
 module "ecs" {
   source = "./ecs"
 
@@ -52,8 +66,9 @@ module "ecs" {
   alb_target_group       = module.alb.alb-tb-arn
   alb_security_group     = module.alb.alb-security-group-id
   vpc                    = data.aws_vpc.jitsi-vpc.id
+  ecs-asg                = module.asg.asg-arn
   depends_on = [
-    module.alb.alb-tb-arn,module.alb.alb-security-group-id
+    module.alb.alb-tb-arn,module.alb.alb-security-group-id,module.asg.asg-arn
   ]
 }
 
